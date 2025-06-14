@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成都四日游 - 熊猫之都的休闲之旅</title>
+    <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-100-M/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        :root {
+            --primary-color: #e86b35;
+            --secondary-color: #11574a;
+            --accent-color: #fdd670;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --bg-light: #f9f7f3;
+            --bg-card: #ffffff;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-light);
+        }
+        h1, h2, h3, h4, h5 {
+            font-family: 'Noto Serif SC', serif;
+        }
+        .hero {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1588001400947-6385aef4ab0e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .day-card {
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        .day-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .timeline-item {
+            border-left: 2px solid var(--secondary-color);
+            padding-left: 20px;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+            top: 0;
+        }
+        .place-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .place-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .weather-icon {
+            font-size: 2rem;
+            margin-right: 0.5rem;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-food {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .badge-attraction {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .badge-activity {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .badge-transport {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部英雄区域 -->
+    <header class="hero text-white py-20 relative">
+        <div class="container mx-auto px-4 relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">成都四日游</h1>
+            <p class="text-xl md:text-2xl opacity-90">熊猫之都的休闲之旅</p>
+            
+            <div class="mt-8 lg:flex items-center">
+                <div class="bg-white bg-opacity-20 backdrop-filter backdrop-blur-md rounded-lg p-4 lg:mr-6 mb-4 lg:mb-0">
+                    <p class="text-lg">旅行日期: 2025年5月10日 - 5月13日 (4天3夜)</p>
+                    <p class="text-lg">旅行团队: 3人同行</p>
+                </div>
+                
+                <div class="bg-white bg-opacity-20 backdrop-filter backdrop-blur-md rounded-lg p-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-cloud-sun weather-icon"></i>
+                        <div>
+                            <p class="text-lg font-medium">旅行期间天气概况</p>
+                            <p>晴到多云，13-30°C，宜人舒适</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 行程概览 -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">行程概览</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 第一天 -->
+                <div class="day-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">DAY 1</h3>
+                        <span class="text-sm text-gray-500">5月10日 周六</span>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-panda-head mr-2 text-green-600"></i>
+                            <span>大熊猫繁育研究基地</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-utensils mr-2 text-red-500"></i>
+                            <span>宽窄巷子品尝美食</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-shopping-bag mr-2 text-purple-500"></i>
+                            <span>春熙路购物体验</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 flex items-center text-xs text-gray-500">
+                        <i class="fas fa-cloud-sun mr-1"></i>
+                        <span>晴转多云 13-27°C</span>
+                    </div>
+                </div>
+
+                <!-- 第二天 -->
+                <div class="day-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">DAY 2</h3>
+                        <span class="text-sm text-gray-500">5月11日 周日</span>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-landmark mr-2 text-yellow-600"></i>
+                            <span>武侯祠参观</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-store mr-2 text-blue-500"></i>
+                            <span>锦里古街游览</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-book mr-2 text-green-700"></i>
+                            <span>杜甫草堂文化体验</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 flex items-center text-xs text-gray-500">
+                        <i class="fas fa-sun mr-1"></i>
+                        <span>晴天 14-29°C</span>
+                    </div>
+                </div>
+
+                <!-- 第三天 -->
+                <div class="day-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">DAY 3</h3>
+                        <span class="text-sm text-gray-500">5月12日 周一</span>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-mountain mr-2 text-green-800"></i>
+                            <span>都江堰景区一日游</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-hiking mr-2 text-brown-600"></i>
+                            <span>青城山前山徒步</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-utensils mr-2 text-red-500"></i>
+                            <span>品尝当地农家美食</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 flex items-center text-xs text-gray-500">
+                        <i class="fas fa-cloud mr-1"></i>
+                        <span>多云转小雨 17-30°C</span>
+                    </div>
+                </div>
+
+                <!-- 第四天 -->
+                <div class="day-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">DAY 4</h3>
+                        <span class="text-sm text-gray-500">5月13日 周二</span>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-mug-hot mr-2 text-brown-500"></i>
+                            <span>人民公园品茶</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-monument mr-2 text-gray-600"></i>
+                            <span>天府广场游览</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-shopping-bag mr-2 text-purple-500"></i>
+                            <span>IFS太古里购物</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 flex items-center text-xs text-gray-500">
+                        <i class="fas fa-cloud mr-1"></i>
+                        <span>多云 18-25°C</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 景点地图 -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">行程地图</h2>
+            <div id="map" class="map-container"></div>
+        </div>
+    </section>
+
+    <!-- 详细行程 -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-10 text-center">详细行程安排</h2>
+            
+            <!-- 第一天 -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="bg-primary-color rounded-full w-10 h-10 flex items-center justify-center text-white font-bold mr-3" style="background-color: var(--primary-color);">1</div>
+                    <h3 class="text-2xl font-bold">Day 1 · 都市探索之旅</h3>
+                    <div class="ml-auto text-sm bg-gray-100 rounded-full px-4 py-1">5月10日 周六</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="space-y-6">
+                            <!-- 行程时间线 -->
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">07:30 - 08:30</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">早餐</h4>
+                                <p class="text-gray-600">在酒店享用丰盛早餐，为一天的行程做好准备。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">08:30 - 09:00</span>
+                                    <span class="badge badge-transport ml-3">交通</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">前往大熊猫繁育研究基地</h4>
+                                <p class="text-gray-600">打车或乘坐公交前往大熊猫基地（约30分钟车程）</p>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.138176,30.740573,成都大熊猫繁育研究基地&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">09:00 - 12:00</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">大熊猫繁育研究基地</h4>
+                                <p class="text-gray-600">参观国宝大熊猫，近距离观看它们的日常生活。早上是熊猫最活跃的时间，可以看到它们进食、玩耍的可爱模样。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：58元/人</li>
+                                    <li>开放时间：7:30-18:00</li>
+                                    <li>建议游览时间：3小时</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">12:00 - 14:00</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">午餐 @ 宽窄巷子</h4>
+                                <p class="text-gray-600">前往宽窄巷子品尝正宗川菜。推荐"钟水饺"的特色水饺和担担面。</p>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.055180,30.663213,成都宽窄巷子&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">14:00 - 17:00</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">宽窄巷子游览</h4>
+                                <p class="text-gray-600">探索成都老街区宽窄巷子，这里保留了成都传统的四合院落，可以体验各种传统手工艺和小吃。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>推荐体验：传统手工艺制作，如捏面人、剪纸等</li>
+                                    <li>特色小吃：三大炮、钵钵鸡、冰粉</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">17:30 - 20:00</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">春熙路购物与晚餐</h4>
+                                <p class="text-gray-600">前往春熙路商业区，可以购物、品尝美食，或者就近参观太古里。这里是成都最繁华的商业区之一。</p>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.078643,30.657952,成都春熙路&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                                <p class="mt-2 text-gray-600">晚餐推荐：龙抄手(春熙路店)、夫妻肺片等特色川菜</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <div class="bg-white rounded-lg shadow-md p-5 sticky top-5">
+                            <h4 class="font-semibold text-lg mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                Day 1 实用信息
+                            </h4>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">交通方式</h5>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-subway text-purple-600 mr-2"></i>
+                                        <span>地铁3号线可直达熊猫基地（终点站振兴站）</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-taxi text-yellow-500 mr-2"></i>
+                                        <span>熊猫基地到宽窄巷子打车约40分钟</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-walking text-green-600 mr-2"></i>
+                                        <span>宽窄巷子到春熙路可乘坐地铁2号线</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">温馨提醒</h5>
+                                <ul class="text-gray-600 space-y-1 list-disc list-inside">
+                                    <li>熊猫基地早上去最好，熊猫更活跃</li>
+                                    <li>记得携带防晒用品和雨伞</li>
+                                    <li>春熙路人流量大，注意看管好随身物品</li>
+                                    <li>宽窄巷子有很多特色小店，可以采购纪念品</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">预算参考</h5>
+                                <table class="w-full text-sm">
+                                    <tr>
+                                        <td class="py-1">熊猫基地门票</td>
+                                        <td class="py-1 text-right">¥58/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">午餐</td>
+                                        <td class="py-1 text-right">¥50-80/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">晚餐</td>
+                                        <td class="py-1 text-right">¥60-100/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">交通费</td>
+                                        <td class="py-1 text-right">¥50-80/人</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200">
+                                        <td class="py-1 font-medium">总计</td>
+                                        <td class="py-1 text-right font-medium">¥218-318/人</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 第二天 -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="bg-primary-color rounded-full w-10 h-10 flex items-center justify-center text-white font-bold mr-3" style="background-color: var(--primary-color);">2</div>
+                    <h3 class="text-2xl font-bold">Day 2 · 历史文化之旅</h3>
+                    <div class="ml-auto text-sm bg-gray-100 rounded-full px-4 py-1">5月11日 周日</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="space-y-6">
+                            <!-- 行程时间线 -->
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">08:00 - 09:00</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">早餐</h4>
+                                <p class="text-gray-600">在酒店享用早餐，或者尝试附近的传统早点铺。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">09:30 - 11:30</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">武侯祠参观</h4>
+                                <p class="text-gray-600">参观中国著名的历史文化遗址，纪念三国时期的蜀汉丞相诸葛亮和刘备。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：60元/人</li>
+                                    <li>开放时间：8:00-18:00</li>
+                                    <li>建议游览时间：2小时</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.050409,30.644724,成都武侯祠&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">11:30 - 13:30</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">锦里午餐</h4>
+                                <p class="text-gray-600">在锦里古街享用午餐，品尝各种四川特色小吃。</p>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.049862,30.645933,成都锦里&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">13:30 - 15:30</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">锦里古街游览</h4>
+                                <p class="text-gray-600">锦里古街是成都著名的商业步行街，这里有各种传统手工艺品、特色小吃和表演。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>推荐购买：蜀绣、漆器等传统手工艺品</li>
+                                    <li>特色体验：传统川剧变脸表演</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">16:00 - 18:00</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">杜甫草堂</h4>
+                                <p class="text-gray-600">参观唐代著名诗人杜甫的故居，了解中国古代文学历史。园内环境优美，古朴典雅。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：60元/人</li>
+                                    <li>开放时间：8:00-18:30</li>
+                                    <li>建议游览时间：2小时</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.029026,30.662500,成都杜甫草堂&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">18:30 - 20:30</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">晚餐 @ 九眼桥附近</h4>
+                                <p class="text-gray-600">在九眼桥附近的餐厅享用晚餐，之后可以沿着锦江散步，欣赏夜景。</p>
+                                <p class="mt-2 text-gray-600">晚餐推荐：九眼桥附近的"吴铭火锅"或"马路边边麻辣烫"</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <div class="bg-white rounded-lg shadow-md p-5 sticky top-5">
+                            <h4 class="font-semibold text-lg mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                Day 2 实用信息
+                            </h4>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">交通方式</h5>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-subway text-purple-600 mr-2"></i>
+                                        <span>武侯祠和锦里相邻，可步行往返</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-taxi text-yellow-500 mr-2"></i>
+                                        <span>锦里到杜甫草堂打车约20分钟</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bus text-green-600 mr-2"></i>
+                                        <span>也可乘坐地铁4号线从武侯祠到草堂路站</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">温馨提醒</h5>
+                                <ul class="text-gray-600 space-y-1 list-disc list-inside">
+                                    <li>武侯祠和杜甫草堂都有讲解服务</li>
+                                    <li>锦里适合购买特色纪念品</li>
+                                    <li>杜甫草堂景区较大，建议预留足够时间</li>
+                                    <li>晚上可以欣赏锦江夜景</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">预算参考</h5>
+                                <table class="w-full text-sm">
+                                    <tr>
+                                        <td class="py-1">武侯祠门票</td>
+                                        <td class="py-1 text-right">¥60/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">杜甫草堂门票</td>
+                                        <td class="py-1 text-right">¥60/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">午餐</td>
+                                        <td class="py-1 text-right">¥40-60/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">晚餐</td>
+                                        <td class="py-1 text-right">¥60-120/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">交通费</td>
+                                        <td class="py-1 text-right">¥30-50/人</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200">
+                                        <td class="py-1 font-medium">总计</td>
+                                        <td class="py-1 text-right font-medium">¥250-350/人</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第三天 -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="bg-primary-color rounded-full w-10 h-10 flex items-center justify-center text-white font-bold mr-3" style="background-color: var(--primary-color);">3</div>
+                    <h3 class="text-2xl font-bold">Day 3 · 自然风光之旅</h3>
+                    <div class="ml-auto text-sm bg-gray-100 rounded-full px-4 py-1">5月12日 周一</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="space-y-6">
+                            <!-- 行程时间线 -->
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">07:00 - 08:00</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">早餐与出发</h4>
+                                <p class="text-gray-600">早起享用早餐，准备前往都江堰和青城山的一日游。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">08:00 - 09:30</span>
+                                    <span class="badge badge-transport ml-3">交通</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">前往都江堰</h4>
+                                <p class="text-gray-600">从成都出发前往都江堰（约1.5小时车程），可以选择包车或乘坐长途公交。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">09:30 - 12:30</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">都江堰景区</h4>
+                                <p class="text-gray-600">参观世界文化遗产都江堰水利工程，了解这座有着2000多年历史的水利奇迹。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：90元/人</li>
+                                    <li>开放时间：8:00-18:00</li>
+                                    <li>建议游览时间：3小时</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=103.610529,31.003363,都江堰景区&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">12:30 - 13:30</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">午餐</h4>
+                                <p class="text-gray-600">在都江堰附近的餐厅享用午餐，尝试当地农家菜。</p>
+                                <p class="mt-2 text-gray-600">推荐：都江堰市区的"渔歌农家乐"，有新鲜的河鱼和当地特色菜</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">14:00 - 17:30</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">青城山前山</h4>
+                                <p class="text-gray-600">游览道教名山青城山，欣赏自然风光和古老道观。可以选择徒步或乘坐索道上山。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：90元/人</li>
+                                    <li>索道费：单程35元，双程60元</li>
+                                    <li>建议游览时间：3-4小时</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=103.598840,30.902545,成都青城山&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">17:30 - 19:00</span>
+                                    <span class="badge badge-transport ml-3">交通</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">返回成都</h4>
+                                <p class="text-gray-600">结束一天的游览，返回成都市区。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">19:00 - 21:00</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">晚餐</h4>
+                                <p class="text-gray-600">回到成都后在酒店附近享用晚餐，放松休息。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <div class="bg-white rounded-lg shadow-md p-5 sticky top-5">
+                            <h4 class="font-semibold text-lg mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                Day 3 实用信息
+                            </h4>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">交通方式</h5>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bus text-green-600 mr-2"></i>
+                                        <span>成都茶店子车站有直达都江堰的班车</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-train text-blue-600 mr-2"></i>
+                                        <span>也可从成都北站乘坐城际铁路</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-car text-yellow-500 mr-2"></i>
+                                        <span>包车往返约600-800元/天</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">温馨提醒</h5>
+                                <ul class="text-gray-600 space-y-1 list-disc list-inside">
+                                    <li>青城山有一定坡度，请穿舒适的登山鞋</li>
+                                    <li>准备足够饮用水和防晒用品</li>
+                                    <li>携带雨具，今天可能有小雨</li>
+                                    <li>建议购买都江堰-青城山联票，会更经济</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">预算参考</h5>
+                                <table class="w-full text-sm">
+                                    <tr>
+                                        <td class="py-1">都江堰门票</td>
+                                        <td class="py-1 text-right">¥90/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">青城山门票</td>
+                                        <td class="py-1 text-right">¥90/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">索道费</td>
+                                        <td class="py-1 text-right">¥60/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">午餐</td>
+                                        <td class="py-1 text-right">¥50-80/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">晚餐</td>
+                                        <td class="py-1 text-right">¥50-100/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">交通费</td>
+                                        <td class="py-1 text-right">¥200-300/人</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200">
+                                        <td class="py-1 font-medium">总计</td>
+                                        <td class="py-1 text-right font-medium">¥540-720/人</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第四天 -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="bg-primary-color rounded-full w-10 h-10 flex items-center justify-center text-white font-bold mr-3" style="background-color: var(--primary-color);">4</div>
+                    <h3 class="text-2xl font-bold">Day 4 · 休闲和购物之旅</h3>
+                    <div class="ml-auto text-sm bg-gray-100 rounded-full px-4 py-1">5月13日 周二</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="space-y-6">
+                            <!-- 行程时间线 -->
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">08:30 - 09:30</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">早餐</h4>
+                                <p class="text-gray-600">在酒店享用早餐，或者尝试附近的传统早点。</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">10:00 - 12:00</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">人民公园休闲</h4>
+                                <p class="text-gray-600">前往人民公园，体验当地传统的"耍茶"文化，观赏成都人的休闲生活。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>门票：免费</li>
+                                    <li>特色体验：在鹤鸣茶社品茶(约15-30元/人)</li>
+                                    <li>特色活动：划船、看当地人打麻将、跳广场舞</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.057641,30.656990,成都人民公园&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">12:00 - 13:30</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">午餐</h4>
+                                <p class="text-gray-600">在天府广场附近享用午餐，可以尝试地道的四川美食。</p>
+                                <p class="mt-2 text-gray-600">推荐：附近的"陈麻婆豆腐"或"韩鹤亭担担面"</p>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">13:30 - 15:00</span>
+                                    <span class="badge badge-attraction ml-3">景点</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">天府广场</h4>
+                                <p class="text-gray-600">参观天府广场和四川博物馆，了解成都的历史和文化。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>天府广场：免费</li>
+                                    <li>四川博物馆：免费（需提前预约）</li>
+                                    <li>建议游览时间：1.5小时</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.065861,30.657401,成都天府广场&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">15:30 - 18:30</span>
+                                    <span class="badge badge-activity ml-3">活动</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">IFS & 太古里购物</h4>
+                                <p class="text-gray-600">前往IFS国际金融中心和太古里，这里汇集了众多国际品牌和特色店铺，是购物和拍照的好去处。</p>
+                                <ul class="mt-2 text-gray-600 list-disc list-inside">
+                                    <li>必看：IFS楼顶的巨型熊猫雕塑</li>
+                                    <li>特色美食：太古里的各类餐厅、咖啡店</li>
+                                </ul>
+                                <div class="mt-2">
+                                    <a href="https://uri.amap.com/navigation?from=&to=104.080236,30.654243,成都IFS国际金融中心&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800" target="_blank">
+                                        <i class="fas fa-location-arrow mr-1"></i> 导航前往
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pb-8">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-secondary-color font-medium">18:30 - 20:30</span>
+                                    <span class="badge badge-food ml-3">用餐</span>
+                                </div>
+                                <h4 class="text-xl font-medium mb-2">告别晚餐</h4>
+                                <p class="text-gray-600">在太古里或附近的高品质餐厅享用此行的最后一顿晚餐。</p>
+                                <p class="mt-2 text-gray-600">推荐：太古里的"寻味香港"、"鹿港小镇"或"花间堂"</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <div class="bg-white rounded-lg shadow-md p-5 sticky top-5">
+                            <h4 class="font-semibold text-lg mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                Day 4 实用信息
+                            </h4>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">交通方式</h5>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-subway text-purple-600 mr-2"></i>
+                                        <span>人民公园至天府广场步行可达</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-walking text-green-600 mr-2"></i>
+                                        <span>天府广场到IFS步行约15分钟</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">温馨提醒</h5>
+                                <ul class="text-gray-600 space-y-1 list-disc list-inside">
+                                    <li>人民公园茶馆需自备茶叶，或现场购买</li>
+                                    <li>进入博物馆需提前预约</li>
+                                    <li>IFS楼顶熊猫是热门拍照点，可能需排队</li>
+                                    <li>准备足够的行李空间带回购物和纪念品</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-medium text-sm uppercase text-gray-500 mb-2">预算参考</h5>
+                                <table class="w-full text-sm">
+                                    <tr>
+                                        <td class="py-1">人民公园泡茶</td>
+                                        <td class="py-1 text-right">¥15-30/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">午餐</td>
+                                        <td class="py-1 text-right">¥50-80/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">晚餐</td>
+                                        <td class="py-1 text-right">¥80-150/人</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">购物预算</td>
+                                        <td class="py-1 text-right">按需准备</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">交通费</td>
+                                        <td class="py-1 text-right">¥20-40/人</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200">
+                                        <td class="py-1 font-medium">基础总计</td>
+                                        <td class="py-1 text-right font-medium">¥165-300/人</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 行李清单 -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">行李准备清单</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-xl mb-4 flex items-center">
+                        <i class="fas fa-tshirt text-blue-500 mr-2"></i> 服装物品
+                    </h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            短袖、T恤（每人3-4件）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            轻薄长袖外套（早晚温差大）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            舒适长裤/短裤
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            舒适运动鞋或徒步鞋（青城山徒步）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            雨具（雨伞或雨衣）
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-xl mb-4 flex items-center">
+                        <i class="fas fa-first-aid text-red-500 mr-2"></i> 个人用品
+                    </h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            防晒霜（SPF30+）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            个人药品（感冒药、肠胃药等）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            充电宝和充电器
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            身份证和其他证件
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            洗漱用品（酒店可能提供）
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-bold text-xl mb-4 flex items-center">
+                        <i class="fas fa-camera text-yellow-500 mr-2"></i> 旅行装备
+                    </h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            相机或手机（记录美好瞬间）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            小型背包（日常出行使用）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            水杯（特别是青城山徒步）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            零食（长途旅行途中补充能量）
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            湿纸巾和纸巾
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 紧急联系信息 -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">紧急联系信息</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+                    <h3 class="font-bold text-xl mb-4 flex items-center text-red-600">
+                        <i class="fas fa-phone-alt mr-2"></i> 紧急电话
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">报警电话:</span>
+                            <span>110</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">急救电话:</span>
+                            <span>120</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">消防电话:</span>
+                            <span>119</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">旅游求助:</span>
+                            <span>12301</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                    <h3 class="font-bold text-xl mb-4 flex items-center text-blue-600">
+                        <i class="fas fa-hospital mr-2"></i> 医疗机构
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">华西医院:</span>
+                            <span>028-85422114</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">四川省人民医院:</span>
+                            <span>028-87393999</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">都江堰市人民医院:</span>
+                            <span>028-87129402</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                    <h3 class="font-bold text-xl mb-4 flex items-center text-green-600">
+                        <i class="fas fa-info-circle mr-2"></i> 其他重要信息
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">出租车投诉:</span>
+                            <span>028-86969000</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">游客投诉:</span>
+                            <span>028-12301</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="font-medium w-24">成都旅游咨询:</span>
+                            <span>028-96927</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 旅行预算 -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">旅行预算总览</h2>
+            
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
+                <div class="flex flex-wrap -mx-4">
+                    <div class="w-full lg:w-2/3 px-4">
+                        <h3 class="text-xl font-bold mb-4">四天总预算 (3人)</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-lg mb-2">门票费用</h4>
+                                <table class="w-full text-sm">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">大熊猫基地</td>
+                                        <td class="py-2 text-right">¥58 × 3人</td>
+                                        <td class="py-2 text-right">¥174</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">武侯祠</td>
+                                        <td class="py-2 text-right">¥60 × 3人</td>
+                                        <td class="py-2 text-right">¥180</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">杜甫草堂</td>
+                                        <td class="py-2 text-right">¥60 × 3人</td>
+                                        <td class="py-2 text-right">¥180</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">都江堰</td>
+                                        <td class="py-2 text-right">¥90 × 3人</td>
+                                        <td class="py-2 text-right">¥270</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">青城山</td>
+                                        <td class="py-2 text-right">¥90 × 3人</td>
+                                        <td class="py-2 text-right">¥270</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">索道费用</td>
+                                        <td class="py-2 text-right">¥60 × 3人</td>
+                                        <td class="py-2 text-right">¥180</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-lg mb-2">餐饮费用</h4>
+                                <table class="w-full text-sm">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">四天餐饮（每人每天约¥200）</td>
+                                        <td class="py-2 text-right">¥200 × 4天 × 3人</td>
+                                        <td class="py-2 text-right">¥2,400</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-lg mb-2">交通费用</h4>
+                                <table class="w-full text-sm">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">市区交通（地铁、打车）</td>
+                                        <td class="py-2 text-right">¥50 × 4天 × 3人</td>
+                                        <td class="py-2 text-right">¥600</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">都江堰-青城山往返</td>
+                                        <td class="py-2 text-right">¥200 × 3人</td>
+                                        <td class="py-2 text-right">¥600</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-lg mb-2">其他费用</h4>
+                                <table class="w-full text-sm">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">纪念品与购物</td>
+                                        <td class="py-2 text-right">约¥300 × 3人</td>
+                                        <td class="py-2 text-right">¥900</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-2">茶馆、特色体验</td>
+                                        <td class="py-2 text-right">¥100 × 3人</td>
+                                        <td class="py-2 text-right">¥300</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full lg:w-1/3 px-4 mt-6 lg:mt-0">
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-bold text-lg mb-4 text-center">总预算</h4>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span>门票费用:</span>
+                                    <span class="font-medium">¥1,254</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>餐饮费用:</span>
+                                    <span class="font-medium">¥2,400</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>交通费用:</span>
+                                    <span class="font-medium">¥1,200</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>其他费用:</span>
+                                    <span class="font-medium">¥1,200</span>
+                                </div>
+                                
+                                <div class="pt-3 border-t border-gray-300">
+                                    <div class="flex justify-between font-bold">
+                                        <span>总计(3人):</span>
+                                        <span>¥6,054</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mt-1 text-gray-600">
+                                        <span>每人均价:</span>
+                                        <span>¥2,018</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 text-center text-sm text-gray-600">
+                                <p>*不含住宿费用</p>
+                                <p>*实际费用可能因个人消费习惯有所差异</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">祝您在成都旅途愉快！</p>
+            <p class="text-gray-400 text-sm">本行程计划由AI旅行助手定制 © 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // 初始化地图
+        document.addEventListener('DOMContentLoaded', function() {
+            var map = L.map('map').setView([30.657, 104.065], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // 添加景点标记
+            var locations = [
+                {name: "大熊猫繁育研究基地", lat: 30.740573, lng: 104.138176, day: 1},
+                {name: "宽窄巷子", lat: 30.663213, lng: 104.055180, day: 1},
+                {name: "春熙路", lat: 30.657952, lng: 104.078643, day: 1},
+                {name: "武侯祠", lat: 30.644724, lng: 104.050409, day: 2},
+                {name: "锦里古街", lat: 30.645933, lng: 104.049862, day: 2},
+                {name: "杜甫草堂", lat: 30.662500, lng: 104.029026, day: 2},
+                {name: "都江堰", lat: 31.003363, lng: 103.610529, day: 3},
+                {name: "青城山", lat: 30.902545, lng: 103.598840, day: 3},
+                {name: "人民公园", lat: 30.656990, lng: 104.057641, day: 4},
+                {name: "天府广场", lat: 30.657401, lng: 104.065861, day: 4},
+                {name: "IFS国际金融中心", lat: 30.654243, lng: 104.080236, day: 4}
+            ];
+            
+            var dayColors = {
+                1: "#e86b35",
+                2: "#11574a",
+                3: "#fdd670",
+                4: "#3498db"
+            };
+            
+            locations.forEach(function(loc) {
+                var marker = L.marker([loc.lat, loc.lng]).addTo(map);
+                
+                var dayLabel = "Day " + loc.day;
+                var popupContent = `<b>${loc.name}</b><br>${dayLabel}<br>
+                <a href="https://uri.amap.com/navigation?from=&to=${loc.lng},${loc.lat},${loc.name}&mode=car&policy=1&src=mypage&coordinate=gaode&callnative=0" target="_blank">
+                导航前往</a>`;
+                
+                marker.bindTooltip(loc.name, {permanent: true, direction: 'top', offset: [0, -10], className: 'my-tooltip'}).openTooltip();
+                marker.bindPopup(popupContent);
+                
+                // 自定义图标颜色
+                marker._icon.style.filter = `hue-rotate(${(loc.day * 60)}deg)`;
+            });
+            
+            // 添加路线连接
+            var day1Points = locations.filter(loc => loc.day === 1).map(loc => [loc.lat, loc.lng]);
+            var day2Points = locations.filter(loc => loc.day === 2).map(loc => [loc.lat, loc.lng]);
+            var day3Points = locations.filter(loc => loc.day === 3).map(loc => [loc.lat, loc.lng]);
+            var day4Points = locations.filter(loc => loc.day === 4).map(loc => [loc.lat, loc.lng]);
+            
+            L.polyline(day1Points, {color: dayColors[1], weight: 3, opacity: 0.7}).addTo(map);
+            L.polyline(day2Points, {color: dayColors[2], weight: 3, opacity: 0.7}).addTo(map);
+            L.polyline(day3Points, {color: dayColors[3], weight: 3, opacity: 0.7}).addTo(map);
+            L.polyline(day4Points, {color: dayColors[4], weight: 3, opacity: 0.7}).addTo(map);
+        });
+    </script>
+</body>
+</html>
